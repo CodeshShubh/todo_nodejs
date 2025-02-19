@@ -1,6 +1,8 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import Todos from './modal.js';
+import Signup from './signupModal.js';
+import md5 from 'md5';
 
 const app = express();
 const PORT=8000;
@@ -93,17 +95,11 @@ app.put('/api/todo/:id', async (req, res) => {
       const todoId = req.params.id;
       const { text } = req.body;
   
-      // Validation: Check if text is provided
       if (!text) {
         return res.status(400).json({ error: "Text is required for updating" });
       }
   
-      // Find and update the todo
-      const updatedTodo = await Todos.findOneAndUpdate(
-        { _id: todoId }, // Find by ID
-        { text: text }, // Update field
-        { new: true }   // Return the updated document
-      );
+      const updatedTodo = await Todos.findOneAndUpdate( { _id: todoId });
   
       // Check if todo exists
       if (!updatedTodo) {
@@ -123,7 +119,66 @@ app.put('/api/todo/:id', async (req, res) => {
 
 
 
+  // signup apis
 
+  app.post('/api/signup', async(req, res)=>{
+      try{
+        const {name, email, password} = req.body;
+        if(!name, !email,  !password)
+         return res.status(400).json({error: 'Please Enter all fields'})
+ 
+        const existUser = await Signup.findOne({email})
+ 
+        if(existUser)
+         return res.status(400).json({error: 'User already register'})
+ 
+        const hashpassword = md5(password);
+ 
+        const user = new Signup({
+         name,
+         email,
+         password:hashpassword
+        })
+ 
+        await user.save();
+        res.status(201).json({ message: 'User registered successfully' });
+
+      }catch(err){
+        res.status(500).json({ error: 'Server error' });
+      }
+  })
+
+
+
+
+
+// login 
+
+app.post('/api/login', async(req,res)=>{
+   try {
+    const {email , password} = req.body;
+
+    if(!email, !password)
+        return res.status(400).json({error: 'Please Enter all fields'})
+
+    const existUser = await Signup.findOne({email});
+
+    if(!existUser)
+        return res.status(400).json({ error: 'User not found' });
+
+    const enterPassword = md5(password);
+
+    if(enterPassword === existUser.password){
+        return res.status(200).json({ message: 'Login successful', existUser });
+    }else{
+        return res.status(400).json({ error: 'Invalid credentials' });
+    }
+
+    
+   } catch (error) {
+        res.status(500).json({ error: 'Server error', error });
+   }
+})
 
 
 
