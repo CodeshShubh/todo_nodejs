@@ -5,6 +5,10 @@ const todoSchema = new schema({
     text:{
         type:String,
         required:true,
+    },
+    userId :{
+        type:String,
+        required:true,
     }
 },{timestamps:true})
 
