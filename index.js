@@ -4,10 +4,11 @@ import Todos from './modal.js';
 import Signup from './signupModal.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import ejs from 'ejs'
 
 const app = express();
 const PORT = 8000;
-const JWT_SECRET = 'your_secret_key'; // Replace with a strong secret
+const JWT_SECRET = 'shubhanshu_saadhiyaan'; // Replace with a strong secret
 
 mongoose.connect('mongodb://localhost:27017/todosDB').then(() => {
     console.log(`Database connected..`);
@@ -15,8 +16,22 @@ mongoose.connect('mongodb://localhost:27017/todosDB').then(() => {
     console.log(`Error in DB connection ->`, err);
 });
 
+
+
 // Middleware
 app.use(express.json());
+
+// this is setup for ejs
+app.set('view engine', 'ejs');
+app.get('/', (req,res)=>{
+  res.render('index')
+})
+
+app.get('/home',(req,res)=>{
+  res.render('home')
+})
+
+
 
 // ✅ **Middleware: Auth Validator (JWT)**
 const validator = async (req, res, next) => {
@@ -32,6 +47,9 @@ const validator = async (req, res, next) => {
         return res.status(401).json({ status: 'Failure', message: 'Invalid Token' });
     }
 };
+
+
+
 
 // ✅ **Signup API**
 app.post('/api/signup', async (req, res) => {
@@ -54,6 +72,9 @@ app.post('/api/signup', async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 });
+
+
+
 
 // ✅ **Login API (JWT Token)**
 app.post('/api/login', async (req, res) => {
@@ -79,6 +100,9 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+
+
+
 // ✅ **Create Todo (Only Logged-in User)**
 app.post('/api/todo', validator, async (req, res) => {
     try {
@@ -95,6 +119,9 @@ app.post('/api/todo', validator, async (req, res) => {
     }
 });
 
+
+
+
 // ✅ **Fetch Todos (Only Todos Created by the Logged-in User)**
 app.get('/api/todos', validator, async (req, res) => {
     try {
@@ -104,6 +131,9 @@ app.get('/api/todos', validator, async (req, res) => {
         res.status(500).json({ error: "Error while fetching todos", error });
     }
 });
+
+
+
 
 // ✅ **Fetch a Single Todo (Only if Belongs to the Logged-in User)**
 app.get('/api/todo/:id', validator, async (req, res) => {
@@ -118,6 +148,8 @@ app.get('/api/todo/:id', validator, async (req, res) => {
     }
 });
 
+
+
 // ✅ **Update Todo (Only if Belongs to the Logged-in User)**
 app.put('/api/todo/:id', validator, async (req, res) => {
     try {
@@ -126,7 +158,7 @@ app.put('/api/todo/:id', validator, async (req, res) => {
             return res.status(400).json({ error: "Text is required for updating" });
 
         const updatedTodo = await Todos.findOneAndUpdate(
-            { _id: req.params.id, userId: req.userId }, 
+            { _id: req.params.id, userId: req.userId },
             { text },
             { new: true }
         );
@@ -140,6 +172,9 @@ app.put('/api/todo/:id', validator, async (req, res) => {
     }
 });
 
+
+
+
 // ✅ **Delete Todo (Only if Belongs to the Logged-in User)**
 app.delete('/api/todo/:id', validator, async (req, res) => {
     try {
@@ -152,6 +187,8 @@ app.delete('/api/todo/:id', validator, async (req, res) => {
         res.status(500).json({ error: "Server error while deleting todo", error });
     }
 });
+
+
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

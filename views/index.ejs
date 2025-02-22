@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ejs files</title>
+</head>
+<body>
+    <%- include('./partials/component.ejs') %>
+    <h1>this is ejs file</h1>
+    <% const name = ['apple', 'banana', 'orange'] %>
+    
+
+     <% name.forEach(element => { %>
+      <li><%= element %></li>
+     <% }) %>
+
+</body>
+</html>
